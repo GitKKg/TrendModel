@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main where
@@ -20,8 +21,19 @@ app :: Snap ()
 app = Snap.route
   [
     -- use Snap.serveDirectory to set html directory
-    ("", Snap.serveDirectory "/home/kyle/WebProgramming/Stock_app/dist/spa-mat/")
+    ("", Snap.serveDirectory "/home/kyle/WebProgramming/Stock_app/dist/spa-mat/"),
+    ("webscoket" , wsSnapHandle)
   ]
+
+wsSnapHandle :: Snap ()
+wsSnapHandle = WS.runWebSocketsSnap wsHandle
+
+wsHandle :: WS.ServerApp
+wsHandle pending = unless True $ do
+  conn <- WS.acceptRequest pending
+  WS.sendTextData conn $ BC.pack "any"
+  _ <- WS.receiveData @B.ByteString conn
+  return ()
 
 main :: IO ()
 main = Snap.httpServe config app
