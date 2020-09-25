@@ -39,7 +39,9 @@ extra-deps:
   - snap-server-1.1.1.2
   - clock-0.8
   - websockets-0.12.7.1
-  
+  - selda-json-0.1.1.0
+  - selda-0.5.1.0
+  - selda-postgresql-0.1.8.1
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a

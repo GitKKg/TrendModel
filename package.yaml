@@ -27,9 +27,16 @@ dependencies:
 - websockets-snap
 - snap-core
 - snap-server
+- aeson
+- text
+- http-client
+- selda
+- selda-postgresql
+- selda-json
+- mtl
 
 library:
-  source-dirs: src
+  source-dirs: module
 
 executables:
   TrendModel-exe:

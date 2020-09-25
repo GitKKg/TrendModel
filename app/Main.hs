@@ -15,28 +15,14 @@ import qualified Snap.Core               as Snap
 import qualified Snap.Http.Server        as Snap
 import qualified Snap.Util.FileServe     as Snap
 import qualified System.IO               as IO
+
+import Commnuication
 --import qualified System.Process          as Process
 
-app :: Snap ()
-app = Snap.route
-  [
-    -- use Snap.serveDirectory to set html directory
-    ("", Snap.serveDirectory "/home/kyle/WebProgramming/Stock_app/dist/spa-mat/"),
-    ("webscoket" , wsSnapHandle)
-  ]
 
-wsSnapHandle :: Snap ()
-wsSnapHandle = WS.runWebSocketsSnap wsHandle
-
-wsHandle :: WS.ServerApp
-wsHandle pending = unless True $ do
-  conn <- WS.acceptRequest pending
-  WS.sendTextData conn $ BC.pack "any"
-  _ <- WS.receiveData @B.ByteString conn
-  return ()
 
 main :: IO ()
-main = Snap.httpServe config app
+main = Snap.httpServe config snapApp
   where
     config =
         Snap.setErrorLog  Snap.ConfigNoLog $
