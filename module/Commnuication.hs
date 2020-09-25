@@ -27,9 +27,9 @@ snapApp = Snap.route
     -- could not add Snap.ifTop,it seems some js files will be got in the deeper path
     -- "/home/kyle/vue/QuasarWebSocketD3Trend/dist/spa/"
     -- "/home/kyle/vue/Stock_app/dist/spa-mat/"
-    ("entry", Snap.serveDirectory "/home/kyle/vue/QuasarWebSocketD3Trend/dist/spa/"),
+    ("", Snap.serveDirectory "/home/kyle/vue/QuasarWebSocketD3Trend/dist/spa/"),
     -- ws://localhost:8000/websocket
-    ("web" , wsSnapHandle)
+    ("websocket" , wsSnapHandle)
   ]
 
 wsSnapHandle :: Snap ()
