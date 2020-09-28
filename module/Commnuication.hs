@@ -20,6 +20,11 @@ import Debug.Trace
 import Control.Concurrent (threadDelay)
 --import qualified System.Process          as Process
 
+import Data.ByteString.Internal
+import Data.ByteString.Lazy
+
+aesonTest =  decode . fromStrict. packChars $ "[1,2,3]" :: Maybe [Int]
+
 snapApp :: Snap ()
 snapApp = Snap.route
   [
