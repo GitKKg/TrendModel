@@ -1,9 +1,12 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Commnuication where
 
+import GHC.Generics
 import Data.Aeson
+import Data.Text
 
 import           Control.Monad           (forever, unless)
 import qualified Data.ByteString         as B
@@ -23,7 +26,42 @@ import Control.Concurrent (threadDelay)
 import Data.ByteString.Internal
 import Data.ByteString.Lazy
 
+data Person = Person {
+      name :: Text
+    , age  :: Int
+    } deriving (Generic, Show)
+
+instance ToJSON Person where
+    -- No need to provide a toJSON implementation.
+
+    -- For efficiency, we write a simple toEncoding implementation, as
+    -- the default version uses toJSON.
+    toEncoding = genericToEncoding defaultOptions
+
+encodePerson = encode (Person {name = "Joe", age = 12})
+
 aesonTest =  decode . fromStrict. packChars $ "[1,2,3]" :: Maybe [Int]
+
+en123 = encode ([1,2,3] :: [Int])
+
+de123 = decode en123 :: Maybe [Int]
+
+data StockData = StockData {
+  code :: String,
+  pricesL :: [Float]
+                           } deriving (Generic , Show)
+
+instance ToJSON StockData where
+  toEncoding = genericToEncoding defaultOptions
+
+instance FromJSON StockData where
+  parseJSON = withObject "StockData" $ \v -> StockData
+    <$> v .: "code"
+    <*> v .: "pricesL" 
+    
+
+someStock = encode (StockData {code ="000001", pricesL = [1.2,3.6,9.08]})
+someStockD = decode someStock :: Maybe StockData
 
 snapApp :: Snap ()
 snapApp = Snap.route
@@ -49,5 +87,6 @@ wsHandle pending = do
     traceM $ "Server Got message " ++ show cmdBs
     threadDelay 1000
     -- WS.sendTextData conn $ cmdBs
-    WS.sendTextData conn $ BC.pack "Server got"  `BC.append` cmdBs `BC.append` "echo back" -- echo back
+--    WS.sendTextData conn $ BC.pack "Server got"  `BC.append` cmdBs `BC.append` "echo back" -- echo back
+    WS.sendTextData conn $ someStock
     return ()
