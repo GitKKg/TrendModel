@@ -25,6 +25,7 @@ import Control.Concurrent (threadDelay)
 
 import Data.ByteString.Internal
 import Data.ByteString.Lazy
+import Data.Maybe
 
 data Person = Person {
       name :: Text
@@ -63,6 +64,48 @@ instance FromJSON StockData where
 someStock = encode (StockData {code ="000001", pricesL = [1.2,3.6,9.08]})
 someStockD = decode someStock :: Maybe StockData
 
+data MessagePack = MessagePack {
+  mpType :: String,
+  mpWords :: String, -- talking words
+  mpPayload :: StockData
+                               } deriving (Generic, Show)
+
+instance ToJSON MessagePack where
+  toEncoding = genericToEncoding defaultOptions
+
+instance FromJSON MessagePack where
+  parseJSON = withObject "MessagePack" $ \v -> MessagePack
+    <$> v .: "mpType"
+    <*> v .: "mpMsg"
+    <*> v .: "mpPayload" 
+  
+messagePack1 = encode (MessagePack
+                       { mpType = "pricesL", mpWords = "data" ,
+                         mpPayload = StockData {
+                           code ="000001", pricesL = [1.2,3.6,9.08]
+                           }
+                       }
+                      )
+
+emptyStockData = StockData {
+  code = "",
+  pricesL = []
+                           }
+
+messagePack2 = encode (MessagePack
+                       { mpType = "pricesL", mpWords = "data" ,
+                         mpPayload = fromJust someStockD
+                       }
+                      )
+messagePack3 = encode (MessagePack
+                       { mpType = "words",
+                         mpWords = "Hello,client!",
+                         mpPayload = emptyStockData 
+                       }
+                      )                              
+
+messagePack1D = decode messagePack1 :: Maybe MessagePack
+
 snapApp :: Snap ()
 snapApp = Snap.route
   [
@@ -85,8 +128,11 @@ wsHandle pending = do
     traceM $ "hi"
     cmdBs <- WS.receiveData @B.ByteString conn
     traceM $ "Server Got message " ++ show cmdBs
-    threadDelay 1000
+    threadDelay 1000000
     -- WS.sendTextData conn $ cmdBs
 --    WS.sendTextData conn $ BC.pack "Server got"  `BC.append` cmdBs `BC.append` "echo back" -- echo back
-    WS.sendTextData conn $ someStock
+    --WS.sendTextData conn $ someStock
+    WS.sendTextData conn $ messagePack2
+    WS.sendTextData conn $ messagePack3
+    --WS.sendClose conn $ BC.pack "bye"
     return ()
